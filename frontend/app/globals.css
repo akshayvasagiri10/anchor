@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-50: #f6f7f9;
+  --color-ink-100: #eceef2;
+  --color-ink-200: #d5d9e2;
+  --color-ink-400: #8b93a7;
+  --color-ink-600: #4a5165;
+  --color-ink-800: #232838;
+  --color-ink-900: #12151f;
+  --color-anchor-400: #4dbfa5;
+  --color-anchor-500: #2ba088;
+  --color-anchor-600: #1d7d6a;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-ink-50);
+  color: var(--color-ink-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--color-ink-900);
+    color: var(--color-ink-100);
+  }
+}
+
+/* Cursor that blinks while tokens are still arriving. */
+@keyframes anchor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.streaming-caret::after {
+  content: "▍";
+  margin-left: 1px;
+  animation: anchor-blink 1s steps(2, start) infinite;
+  color: var(--color-anchor-500);
+}
+
+.source-flash {
+  animation: source-flash 1.2s ease-out;
+}
+
+@keyframes source-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--color-anchor-400) 35%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
