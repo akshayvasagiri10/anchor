@@ -1,0 +1,33 @@
+# Render Blueprint — deploys the Anchor backend from this repo.
+#
+# In Render: New → Blueprint → pick this repo. Render reads this file and
+# provisions the service; you only supply GROQ_API_KEY.
+services:
+  - type: web
+    name: anchor-api
+    runtime: docker
+    plan: free
+    region: singapore # closest free region to India; oregon/frankfurt also free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Generation must be hosted — `lmstudio` and `ollama` point at
+      # localhost, which inside a container is the container itself.
+      - key: ANCHOR_LLM_PROVIDER
+        value: groq
+      # sync:false => Render prompts for it and stores it as a secret rather
+      # than reading a value out of this file. Never commit a key here.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ANCHOR_CORS_ORIGINS
+        value: https://anchor-rag.vercel.app
+      # Free instances have 512 MB. The ONNX embedder fits, but if the
+      # service OOMs on boot, set this to false for BM25-only retrieval —
+      # the app degrades cleanly and /api/health reports the mode.
+      - key: ANCHOR_EMBEDDINGS_ENABLED
+        value: "true"
+      # Keep model downloads inside the image layer, not the runtime disk.
+      - key: HF_HOME
+        value: /home/user/.cache/huggingface
