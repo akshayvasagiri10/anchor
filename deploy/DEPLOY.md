@@ -29,12 +29,42 @@ is ~2 GB of weights, roughly 8× the entire function budget, and CPU inference
 on a serverless vCPU would exceed the timeout mid-answer. If you want local
 weights, they run on hardware you control: your Mac, or a VPS.
 
-## Backend hosting options
+## Backend on Render (the verified path)
+
+`render.yaml` at the repo root is a Blueprint — Render reads it and
+provisions everything except the API key.
+
+1. Render dashboard → **New** → **Blueprint**
+2. Connect the GitHub repo `akshayvasagiri10/anchor`
+3. Render detects `render.yaml` and shows one service, `anchor-api`
+4. It prompts for `GROQ_API_KEY` — paste a free key from console.groq.com
+5. **Apply**. First build takes ~5 minutes (it bakes in the embedding model
+   and indexes the sample corpus so cold starts don't re-download them).
+
+You get `https://anchor-api.onrender.com`. Verify:
+
+```bash
+curl https://anchor-api.onrender.com/api/health
+```
+
+Then point the frontend at it — Vercel → anchor-rag → Settings → Environment
+Variables → `NEXT_PUBLIC_API_URL` = that URL → redeploy.
+
+**The free tier sleeps after 15 minutes of inactivity.** The first request
+after a sleep takes ~50 s while the container wakes. That is the single
+biggest UX wart of this deployment; mention it on your portfolio page rather
+than letting a visitor think it's broken.
+
+Locally verified before deploying: the image boots under a hard 512 MB cap,
+answers `/api/health`, and serves hybrid retrieval from the baked index at
+190 MB resident.
+
+## Other backend hosting options
 
 | Host | Free? | Catch |
 |---|---|---|
 | **Vercel Python** | Yes | Read-only corpus — uploads don't persist. No new account needed. |
-| **Render** | Yes | 512 MB RAM, sleeps after 15 min idle, ~50 s cold start |
+| **Render** *(verified)* | Yes | Sleeps after 15 min idle, ~50 s cold start. Measured **190 MB of the 512 MB** cap with embeddings on, so hybrid retrieval fits. |
 | **Koyeb** | Yes | One instance, 512 MB |
 | **HF Spaces (Docker)** | **No** | Needs PRO |
 | **Fly.io / Railway** | No | Card required |
