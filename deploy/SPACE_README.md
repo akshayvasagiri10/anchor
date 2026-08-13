@@ -10,6 +10,10 @@ pinned: false
 
 # Anchor — backend API
 
+> **Requires a Hugging Face PRO subscription.** Free accounts can only create
+> Static Spaces; Docker Spaces return `402 Payment Required` on creation.
+> See `deploy/DEPLOY.md` for free alternatives.
+
 Hybrid-retrieval RAG backend: BM25 (SQLite FTS5) + dense vectors (fastembed /
 all-MiniLM-L6-v2) fused with Reciprocal Rank Fusion.
 

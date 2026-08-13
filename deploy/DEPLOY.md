@@ -1,7 +1,13 @@
 # Deploying Anchor for free
 
-The short version: **Vercel hosts the frontend, Hugging Face Spaces hosts the
-backend, and generation goes to a free hosted API.** Total cost ₹0.
+**Frontend: Vercel free tier. Confirmed working —**
+https://anchor-rag.vercel.app
+
+**Backend: pick a host below.** The obvious candidate used to be Hugging Face
+Spaces, but as of 2026 **Docker Spaces require a PRO subscription** — the free
+tier only permits Static Spaces, which serve HTML and cannot run a Python
+process. Verified the hard way: `create_repo(..., space_sdk="docker")` returns
+`402 Payment Required`.
 
 ## Why not put everything on Vercel
 
@@ -23,7 +29,23 @@ is ~2 GB of weights, roughly 8× the entire function budget, and CPU inference
 on a serverless vCPU would exceed the timeout mid-answer. If you want local
 weights, they run on hardware you control: your Mac, or a VPS.
 
-## Step 1 — backend on Hugging Face Spaces
+## Backend hosting options
+
+| Host | Free? | Catch |
+|---|---|---|
+| **Vercel Python** | Yes | Read-only corpus — uploads don't persist. No new account needed. |
+| **Render** | Yes | 512 MB RAM, sleeps after 15 min idle, ~50 s cold start |
+| **Koyeb** | Yes | One instance, 512 MB |
+| **HF Spaces (Docker)** | **No** | Needs PRO |
+| **Fly.io / Railway** | No | Card required |
+
+Vercel is the path of least resistance if you already deployed the frontend
+there: same account, same CLI. The trade is that a serverless filesystem is
+ephemeral, so ship a **prebuilt SQLite index in the repo** and treat the
+corpus as read-only. Uploads through the UI will appear to work and then
+vanish on the next cold start, so disable them in a deployed build.
+
+## If you have a PRO account — Hugging Face Spaces
 
 Free tier: 2 vCPU, 16 GB RAM, Docker, no cold-start billing.
 
